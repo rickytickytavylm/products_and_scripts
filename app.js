@@ -330,7 +330,7 @@
       (t.includes("семейн") || t.includes("психолог") || t.includes("психиатр") ? scripts.find((s) => s.id === "online") : null);
 
     if (t.includes("vpn") || t.includes("тайм") || t.includes("не отвечает")) {
-      return "Если ответа нет дольше 20 секунд, отключите VPN и отправьте вопрос ещё раз. Ключ входа к серверу пока не подключён, я отвечаю здесь, в скриптах.";
+      return "Если ответ завис, отключите VPN или прокси и отправьте вопрос ещё раз.";
     }
     if (!hit) {
       return "Уточните направление: РЦ, стационар, детокс, ГПС, индивидуальное сопровождение, помощь близким, зависимые или другой онлайн. Могу дать приветствие, вопросы, цену или порядок оформления.";
@@ -432,10 +432,14 @@
       render();
     } catch (e) {
       clearTimeout(timer);
-      kiraChat.push({
-        role: "warn",
-        text: "Сервер веб-Киры не ответил. Отключите VPN и отправьте вопрос ещё раз.",
-      });
+      const timedOut = e && (e.name === "AbortError" || /aborted|timeout/i.test(String(e.message || "")));
+      const blocked = e instanceof TypeError && !acc;
+      const warn = blocked
+        ? "Не удалось связаться с сервером. Если включён VPN или прокси — отключите и отправьте ещё раз."
+        : timedOut
+          ? "Ответ не пришёл вовремя. Если включён VPN — отключите и отправьте вопрос ещё раз."
+          : "Связь прервалась. Попробуйте ещё раз. Если включён VPN — его тоже стоит отключить.";
+      kiraChat.push({ role: "warn", text: warn });
       kiraChat.push({ role: "bot", text: localKira(text) });
       render();
     }
