@@ -14,7 +14,11 @@
   const ICONS = {
     scripts: '<svg viewBox="0 0 24 24"><path d="M7 5h10M7 10h10M7 15h6"/><rect x="4.5" y="3.5" width="15" height="17" rx="2.4"/></svg>',
     kira: '<svg viewBox="0 0 24 24"><path d="M12 4l1.1 4.3L17.4 9.4l-4.3 1.1L12 14.8l-1.1-4.3L6.6 9.4l4.3-1.1z"/></svg>',
+    back: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+    send: '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M4.4 12 3 4.3c-.2-1 .8-1.8 1.7-1.4l15.6 7.3c1 .5 1 1.9 0 2.4L4.7 20.1c-.9.4-1.9-.4-1.7-1.4L4.4 12Zm1.7-.9h6.2c.5 0 .9.4.9.9s-.4.9-.9.9H6.1l-.9 5 12.9-6-12.9-6 .9 5.2Z"/></svg>',
   };
+
+  let lastRouteKey = "";
 
   const esc = (s) =>
     String(s || "")
@@ -45,6 +49,13 @@
     <header class="nav">
       <a class="brand" href="#/">школа доктора шурова</a>
       ${extra}
+    </header>`;
+
+  const topbar = (title) => `
+    <header class="topbar">
+      <button class="icon-btn" type="button" data-back aria-label="Назад">${ICONS.back}</button>
+      <p class="topbar-title">${esc(title)}</p>
+      <span class="topbar-spacer" aria-hidden="true"></span>
     </header>`;
 
   const filtered = () => {
@@ -177,7 +188,7 @@
       .join("");
     return `
     <article class="page-script">
-      ${brand(`<button class="back" type="button" data-back>Назад</button>`)}
+      ${topbar(s.title)}
       <div class="read">
         <p class="kicker">${esc(s.tag)} · ${esc(s.time)}</p>
         <h1>${esc(s.full)}</h1>
@@ -271,27 +282,23 @@
           ${list(h.followup)}
         </section>
       </div>
-      ${dock("home")}
     </article>`;
   };
 
   const kiraHtml = () => `
-    <div class="page-kira kira">
-      ${brand(`<button class="back" type="button" data-back>Назад</button>`)}
-      <div class="kira-head">
-        <h1>Кира</h1>
-        <p>Помогает менеджеру держать скрипт. Если ответ зависнет дольше 20 секунд, отключите VPN и повторите.</p>
-      </div>
+    <div class="page-kira">
+      ${topbar("Кира")}
       <div class="feed" id="feed">
         ${kiraChat
           .map((m) => `<div class="bubble ${m.role === "warn" ? "warn" : m.role === "me" ? "me" : "bot"}">${esc(m.text)}</div>`)
           .join("")}
       </div>
       <form class="composer" id="kiraForm">
-        <textarea id="kiraIn" rows="1" placeholder="Как объявить цену РЦ"></textarea>
-        <button type="submit" aria-label="Отправить">↑</button>
+        <div class="composer-inner">
+          <textarea id="kiraIn" class="composer-input" rows="1" placeholder="Как объявить цену РЦ" enterkeyhint="send"></textarea>
+          <button class="send-btn" type="submit" aria-label="Отправить">${ICONS.send}</button>
+        </div>
       </form>
-      ${dock("kira")}
     </div>`;
 
   const localKira = (text) => {
@@ -422,15 +429,22 @@
     const form = document.getElementById("kiraForm");
     const input = document.getElementById("kiraIn");
     if (form && input) {
+      const autoGrow = () => {
+        input.style.height = "auto";
+        input.style.height = Math.min(input.scrollHeight, 140) + "px";
+      };
+      autoGrow();
+      input.oninput = autoGrow;
       form.onsubmit = (e) => {
         e.preventDefault();
         const text = input.value.trim();
         if (!text) return;
         input.value = "";
+        autoGrow();
         askKira(text);
       };
       input.onkeydown = (e) => {
-        if (e.key === "Enter" && !e.shiftKey && window.matchMedia("(min-width: 721px)").matches) {
+        if (e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
           form.requestSubmit();
         }
@@ -438,10 +452,26 @@
     }
     const feed = document.getElementById("feed");
     if (feed) feed.scrollTop = feed.scrollHeight;
+    syncKiraViewport();
+  };
+
+  const syncKiraViewport = () => {
+    const page = document.querySelector(".page-kira");
+    if (!page) {
+      document.body.style.height = "";
+      return;
+    }
+    const vv = window.visualViewport;
+    const h = vv ? vv.height : window.innerHeight;
+    page.style.height = h + "px";
+    page.style.transform = vv ? `translateY(${vv.offsetTop}px)` : "";
   };
 
   const render = () => {
     const r = route();
+    const key = r.name + (r.id || "");
+    const routeChanged = key !== lastRouteKey;
+    lastRouteKey = key;
     document.body.className = "is-" + r.name;
     if (r.name === "script") {
       app.innerHTML = scriptHtml(scripts.find((s) => s.id === r.id));
@@ -451,6 +481,9 @@
       app.innerHTML = homeHtml();
     }
     bind();
+    if (routeChanged && r.name !== "kira") {
+      window.scrollTo(0, 0);
+    }
   };
 
   let touchX = 0;
@@ -473,5 +506,7 @@
   );
 
   window.addEventListener("hashchange", render);
+  window.visualViewport?.addEventListener("resize", syncKiraViewport);
+  window.visualViewport?.addEventListener("scroll", syncKiraViewport);
   render();
 })();
