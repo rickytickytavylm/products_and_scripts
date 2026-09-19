@@ -197,17 +197,23 @@
     const values = (p.value || [])
       .map((x) => `<section class="value"><h3>${esc(x.title)}</h3><p>${esc(x.text)}</p></section>`)
       .join("");
-    const steps = (c.steps || [])
-      .map(
-        (x, i) => `
-      <section class="talk-step">
-        <p class="step-no">${String(i + 1).padStart(2, "0")}</p>
-        <h3>${esc(x.title)}</h3>
-        <p class="hint">${esc(x.note)}</p>
-        ${list(x.questions)}
-      </section>`
-      )
-      .join("");
+    const steps =
+      s.id === "rc"
+        ? list(
+            (c.steps || []).flatMap((x) => x.questions || []),
+            "question-list"
+          )
+        : (c.steps || [])
+            .map(
+              (x, i) => `
+          <section class="talk-step">
+            <p class="step-no">${String(i + 1).padStart(2, "0")}</p>
+            <h3>${esc(x.title)}</h3>
+            <p class="hint">${esc(x.note)}</p>
+            ${list(x.questions)}
+          </section>`
+            )
+            .join("");
     const objections = (c.objections || [])
       .map(
         (x) => `
