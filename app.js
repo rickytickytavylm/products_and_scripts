@@ -103,8 +103,8 @@
           <input class="search" id="q" type="search" placeholder="Найти продукт" value="${esc(query)}" />
           <div class="seg">
             <button type="button" data-filter="all" class="${filter === "all" ? "on" : ""}">Все</button>
-            <button type="button" data-filter="offline" class="${filter === "offline" ? "on" : ""}">Офлайн</button>
             <button type="button" data-filter="online" class="${filter === "online" ? "on" : ""}">Онлайн</button>
+            <button type="button" data-filter="offline" class="${filter === "offline" ? "on" : ""}">Офлайн</button>
           </div>
         </div>
         <div class="grid">
