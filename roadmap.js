@@ -123,7 +123,7 @@ window.MF_ROADMAP = {
   ],
   prices: [
     { place: "Серпухов", standard: "80 000 ₽", intensive: "100 000 ₽", individual: "120 000 ₽" },
-    { place: "Дроздово", standard: "90 000 ₽", intensive: "110 000 ₽", individual: "120 000 ₽" },
+    { place: "Дроздово", standard: "90 000 ₽", intensive: "110 000 ₽", individual: "130 000 ₽" },
     { place: "Тучково", standard: "140 000 ₽", intensive: "170 000 ₽", individual: "200 000 ₽" },
   ],
   followup: [

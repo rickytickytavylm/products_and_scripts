@@ -434,6 +434,75 @@ body.is-kira .app {
   font-weight: 600;
 }
 
+.tariff-details {
+  display: grid;
+  gap: 14px;
+  margin: 8px 0 40px;
+}
+.tariff-details-label {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--violet);
+}
+.tariff-card {
+  position: relative;
+  padding: 22px 24px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: #fbfafc;
+}
+.tariff-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--gold);
+}
+.tariff-intensive::before { background: #3078dc; }
+.tariff-individual::before { background: #c94949; }
+.tariff-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+.tariff-head h3 { margin: 0; }
+.tariff-head b {
+  flex: none;
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 500;
+}
+.tariff-summary { margin: 0 0 14px; }
+.tariff-includes { margin-bottom: 16px; }
+.tariff-for {
+  margin: 0 0 14px;
+  color: var(--mute);
+}
+.tariff-accent {
+  padding: 14px 16px;
+  background: #fff;
+  border-left: 2px solid var(--violet);
+}
+.tariff-accent span {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--violet);
+}
+.tariff-accent p {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 17px;
+}
+
 .limits {
   margin: 40px 0 0;
   padding: 24px 26px;
@@ -823,6 +892,9 @@ body.is-kira .app {
   .decision-row strong::before { content: "→ "; color: var(--gold); }
   .offer-row { grid-template-columns: 1fr; gap: 8px; }
   .offer-side { align-items: flex-start; text-align: left; }
+  .tariff-card { padding: 18px 16px 18px 20px; }
+  .tariff-head { align-items: flex-start; }
+  .tariff-head b { font-size: 16px; }
   .limits {
     margin: 24px 0 0;
     padding: 18px 16px;

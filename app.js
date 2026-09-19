@@ -163,6 +163,32 @@
         .join("")}
     </div>`;
 
+  const tariffDetails = (items) => {
+    if (!items?.length) return "";
+    return `
+      <div class="tariff-details">
+        <p class="tariff-details-label">Дроздово · что входит</p>
+        ${items
+          .map(
+            (x) => `
+          <section class="tariff-card tariff-${esc(x.tone)}">
+            <div class="tariff-head">
+              <h3>${esc(x.name)}</h3>
+              <b>${esc(x.price)}</b>
+            </div>
+            <p class="tariff-summary">${esc(x.summary)}</p>
+            ${x.includes ? list(x.includes, "check-list tariff-includes") : ""}
+            <p class="tariff-for"><strong>Для кого:</strong> ${esc(x.forWhom)}</p>
+            <div class="tariff-accent">
+              <span>Акцент менеджера</span>
+              <p>«${esc(x.accent)}»</p>
+            </div>
+          </section>`
+          )
+          .join("")}
+      </div>`;
+  };
+
   const scriptHtml = (s) => {
     if (!s) return homeHtml();
     const p = s.presentation;
@@ -251,6 +277,7 @@
 
           <h2>Форматы и цена</h2>
           ${offers(p.offers)}
+          ${tariffDetails(p.tariffDetails)}
 
           <aside class="limits">
             <h3>Не обещать</h3>
