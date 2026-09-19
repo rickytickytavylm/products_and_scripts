@@ -1,7 +1,8 @@
-// Позже: BACKEND_URL = https://api.kira-ai.online, вход по ключу.
-// Сейчас ключ не подключаем: сервис открывается сразу, Кира отвечает локально.
+// Тот же сервер, что у веб-Киры: https://api.kira-ai.online
 window.MF_CONFIG = {
-  BACKEND_URL: "",
-  KEY: "",
-  TIMEOUT_MS: 20000,
+  BACKEND_URL:
+    location.hostname === "localhost" || location.hostname === "127.0.0.1"
+      ? "http://localhost:8788"
+      : "https://api.kira-ai.online",
+  TIMEOUT_MS: 75000,
 };

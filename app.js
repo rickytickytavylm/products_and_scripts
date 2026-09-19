@@ -7,9 +7,24 @@
   let kiraChat = [
     {
       role: "bot",
-      text: "Я Кира для менеджера. Спросите, как вести РЦ, стационар, детокс, семейное или онлайн-направление. Ключ входа пока не нужен.",
+      text: "Я Кира. Помогаю вести любой кейс: маршрут, возражение, цена, оформление. Могу опереться на скрипты этой площадки и на то, что клиент уже мог услышать от меня на сайте.",
     },
   ];
+  let kiraConvId = "";
+  const kiraDevice = (() => {
+    const key = "mf_kira_device";
+    let id = "";
+    try {
+      id = localStorage.getItem(key) || "";
+    } catch (_) {}
+    if (!id) {
+      id = (crypto.randomUUID && crypto.randomUUID()) || `mf-${Date.now()}`;
+      try {
+        localStorage.setItem(key, id);
+      } catch (_) {}
+    }
+    return id;
+  })();
 
   const ICONS = {
     scripts: '<svg viewBox="0 0 24 24"><path d="M7 5h10M7 10h10M7 15h6"/><rect x="4.5" y="3.5" width="15" height="17" rx="2.4"/></svg>',
@@ -340,37 +355,90 @@
     kiraChat.push({ role: "me", text });
     render();
     const url = (cfg.BACKEND_URL || "").replace(/\/$/, "");
-    const key = (cfg.KEY || "").trim();
-    if (url && key) {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), cfg.TIMEOUT_MS || 20000);
-      try {
-        const res = await fetch(url + "/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "X-Admin-Token": key },
-          body: JSON.stringify({ message: text, role: "manager_coach" }),
-          signal: ctrl.signal,
-        });
-        clearTimeout(timer);
-        const data = await res.json().catch(() => ({}));
-        const reply = data.reply || data.text || "";
-        if (!res.ok || !reply) throw new Error("empty");
-        kiraChat.push({ role: "bot", text: reply });
-        render();
-        return;
-      } catch (e) {
-        clearTimeout(timer);
-        kiraChat.push({
-          role: "warn",
-          text: "Ответ не пришёл вовремя. Отключите VPN и отправьте вопрос ещё раз.",
-        });
-        kiraChat.push({ role: "bot", text: localKira(text) });
-        render();
-        return;
-      }
+    const feed = document.getElementById("feed");
+    const bubble = document.createElement("div");
+    bubble.className = "bubble bot";
+    bubble.textContent = "Думаю…";
+    if (feed) {
+      feed.appendChild(bubble);
+      feed.scrollTop = feed.scrollHeight;
     }
-    kiraChat.push({ role: "bot", text: localKira(text) });
-    render();
+
+    const history = kiraChat
+      .filter((m) => m.role === "me" || m.role === "bot")
+      .map((m) => ({
+        role: m.role === "me" ? "user" : "assistant",
+        content: m.text,
+      }));
+
+    if (!url) {
+      const fallback = localKira(text);
+      kiraChat.push({ role: "bot", text: fallback });
+      render();
+      return;
+    }
+
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), cfg.TIMEOUT_MS || 75000);
+    let acc = "";
+    try {
+      const res = await fetch(url + "/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: ctrl.signal,
+        body: JSON.stringify({
+          messages: history,
+          mode: "manager",
+          deviceId: kiraDevice,
+          conversationId: kiraConvId || undefined,
+          lang: "ru",
+        }),
+      });
+      if (!res.ok || !res.body) throw new Error("bad");
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      let buf = "";
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        const parts = buf.split("\n\n");
+        buf = parts.pop() || "";
+        for (const block of parts) {
+          const em = block.match(/^event:\s*(.+)$/m);
+          const dm = block.match(/^data:\s*(.+)$/m);
+          if (!dm) continue;
+          let data;
+          try {
+            data = JSON.parse(dm[1]);
+          } catch (_) {
+            continue;
+          }
+          const ev = em ? em[1].trim() : "message";
+          if (ev === "delta" && data.text) {
+            acc += data.text;
+            bubble.textContent = acc;
+            if (feed) feed.scrollTop = feed.scrollHeight;
+          } else if (ev === "error") {
+            throw new Error(data.message || "error");
+          } else if (ev === "done" && data.conversationId) {
+            kiraConvId = data.conversationId;
+          }
+        }
+      }
+      clearTimeout(timer);
+      if (!acc) throw new Error("empty");
+      kiraChat.push({ role: "bot", text: acc });
+      render();
+    } catch (e) {
+      clearTimeout(timer);
+      kiraChat.push({
+        role: "warn",
+        text: "Сервер веб-Киры не ответил. Отключите VPN и отправьте вопрос ещё раз.",
+      });
+      kiraChat.push({ role: "bot", text: localKira(text) });
+      render();
+    }
   };
 
   const bind = () => {
