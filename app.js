@@ -63,8 +63,8 @@
     <div class="page-home">
       <section class="hero">
         <picture class="hero-pic">
-          <source media="(max-width: 720px)" srcset="assets/hero-mobile.png" />
-          <img src="assets/hero-desktop.png" alt="" />
+          <source media="(max-width: 720px)" srcset="assets/hero-mobile.webp" type="image/webp" />
+          <img src="assets/hero-desktop.webp" alt="" width="1280" height="720" fetchpriority="high" decoding="async" />
         </picture>
         ${brand(`<span class="nav-meta">для менеджеров</span>`)}
         <div class="hero-copy">
