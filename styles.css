@@ -113,7 +113,8 @@ body.is-kira .app {
   max-width: 22em;
   font-size: 18px;
   line-height: 1.4;
-  color: var(--mute);
+  font-weight: 500;
+  color: var(--ink);
 }
 
 .wrap {
