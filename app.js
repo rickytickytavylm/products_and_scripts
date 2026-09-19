@@ -1,5 +1,6 @@
 (() => {
   const scripts = window.MF_SCRIPTS || [];
+  const roadmap = window.MF_ROADMAP || {};
   const cfg = window.MF_CONFIG || {};
   const app = document.getElementById("app");
   let filter = "all";
@@ -28,6 +29,7 @@
 
   const ICONS = {
     scripts: '<svg viewBox="0 0 24 24"><path d="M7 5h10M7 10h10M7 15h6"/><rect x="4.5" y="3.5" width="15" height="17" rx="2.4"/></svg>',
+    map: '<svg viewBox="0 0 24 24"><circle cx="6" cy="7" r="2.2"/><circle cx="18" cy="12" r="2.2"/><circle cx="8" cy="18" r="2.2"/><path d="M8 8.2l8.2 3.2M16.2 13.6L9.6 16.6"/></svg>',
     kira: '<svg viewBox="0 0 24 24"><path d="M12 4l1.1 4.3L17.4 9.4l-4.3 1.1L12 14.8l-1.1-4.3L6.6 9.4l4.3-1.1z"/></svg>',
     back: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
     send: '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M4.4 12 3 4.3c-.2-1 .8-1.8 1.7-1.4l15.6 7.3c1 .5 1 1.9 0 2.4L4.7 20.1c-.9.4-1.9-.4-1.7-1.4L4.4 12Zm1.7-.9h6.2c.5 0 .9.4.9.9s-.4.9-.9.9H6.1l-.9 5 12.9-6-12.9-6 .9 5.2Z"/></svg>',
@@ -45,6 +47,7 @@
     const raw = (location.hash || "#/").replace(/^#/, "");
     const parts = raw.split("/").filter(Boolean);
     if (parts[0] === "script" && parts[1]) return { name: "script", id: parts[1] };
+    if (parts[0] === "map") return { name: "map" };
     if (parts[0] === "kira") return { name: "kira" };
     return { name: "home" };
   };
@@ -57,6 +60,7 @@
   const dock = (active) => `
     <nav class="dock">
       <a href="#/" class="${active === "home" ? "on" : ""}">${ICONS.scripts}<span>Материалы</span></a>
+      <a href="#/map" class="${active === "map" ? "on" : ""}">${ICONS.map}<span>Карта</span></a>
       <a href="#/kira" class="${active === "kira" ? "on" : ""}">${ICONS.kira}<span>Кира</span></a>
     </nav>`;
 
@@ -208,7 +212,11 @@
         <p class="kicker">${esc(s.tag)} · ${esc(s.time)}</p>
         <h1>${esc(s.full)}</h1>
         <p class="dek">${esc(s.lead)}</p>
-        <p class="coach"><b>Менеджер сам ведёт продажу до решения клиента, оплаты или подтверждённого оформления.</b> Врачи, диспетчеры и администраторы подключаются только к исполнению услуги, а не забирают продажу.</p>
+        <p class="coach"><b>Менеджер сам ведёт продажу до решения клиента, оплаты или подтверждённого оформления.</b> Врачи, диспетчеры и администраторы подключаются только к исполнению услуги, а не забирают продажу.${
+          s.id === "rc"
+            ? ` <a class="coach-link" href="#/map">Дорожная карта РЦ</a>`
+            : ""
+        }</p>
 
         <nav class="article-nav" aria-label="Содержание">
           <button type="button" data-jump="product">Продукт</button>
@@ -298,6 +306,84 @@
         </section>
       </div>
     </article>`;
+  };
+
+  const mapHtml = () => {
+    const r = roadmap;
+    const stages = r.stages || [];
+    const path = stages
+      .map((s) => {
+        const say = (s.say || []).map((x) => quote(x)).join("");
+        const qs = s.questions ? list(s.questions) : "";
+        const work = s.do ? list(s.do, "check-list") : "";
+        const points = s.points ? list(s.points) : "";
+        const family = s.family ? `<h3>Как семья видит, что всё идёт хорошо</h3>${list(s.family)}` : "";
+        const example = s.example
+          ? `<div class="map-example"><p class="insight-label">Пример отражения</p><p>${esc(s.example)}</p></div>`
+          : "";
+        return `
+        <section class="map-step" id="${esc(s.id)}">
+          <p class="map-no">${esc(s.no)}</p>
+          <div class="map-step-body">
+            ${s.time ? `<p class="map-time">${esc(s.time)}</p>` : ""}
+            <h2>${esc(s.title)}</h2>
+            <p class="chapter-lead">${esc(s.goal)}</p>
+            ${work}${qs}${example}${say}${points}${family}
+          </div>
+        </section>`;
+      })
+      .join("");
+    const prices = (r.prices || [])
+      .map(
+        (x) => `
+      <div class="price-row">
+        <h3>${esc(x.place)}</h3>
+        <p><span>Стандарт</span><b>${esc(x.standard)}</b></p>
+        <p><span>Интенсив</span><b>${esc(x.intensive)}</b></p>
+        <p><span>Индивидуальный</span><b>${esc(x.individual)}</b></p>
+      </div>`
+      )
+      .join("");
+    const follow = (r.followup || [])
+      .map(
+        (x) => `
+      <div class="follow-row">
+        <strong>${esc(x.when)}</strong>
+        <span>${esc(x.what)}</span>
+      </div>`
+      )
+      .join("");
+    return `
+    <div class="page-map">
+      ${brand(`<span class="nav-meta">регламент РЦ</span>`)}
+      <div class="read map-read">
+        <p class="kicker">Отдельная вкладка · не лонгрид продукта</p>
+        <h1>${esc(r.title)}</h1>
+        <p class="dek">${esc(r.lead)}</p>
+        <p class="coach">${esc(r.coach)} <a class="coach-link" href="#/script/rc">Открыть скрипт РЦ</a></p>
+        <nav class="article-nav" aria-label="Этапы">
+          ${stages
+            .map((s) => `<button type="button" data-jump="${esc(s.id)}">${esc(s.no)}</button>`)
+            .join("")}
+        </nav>
+        <div class="map-path">${path}</div>
+        <section class="chapter" id="price-board">
+          <p class="chapter-label">Корпуса</p>
+          <h2>Ценник в месяц</h2>
+          <div class="price-board">${prices}</div>
+        </section>
+        <section class="chapter" id="follow">
+          <p class="chapter-label">После звонка</p>
+          <h2>Регламент касаний</h2>
+          <div class="follow-board">${follow}</div>
+          <aside class="limits">
+            <h3>Когда можно снять заявку</h3>
+            <p>${esc(r.closeRule)}</p>
+          </aside>
+        </section>
+      </div>
+      ${dock("map")}
+    </div>`;
   };
 
   const kiraHtml = () => `
@@ -547,6 +633,8 @@
     document.body.className = "is-" + r.name;
     if (r.name === "script") {
       app.innerHTML = scriptHtml(scripts.find((s) => s.id === r.id));
+    } else if (r.name === "map") {
+      app.innerHTML = mapHtml();
     } else if (r.name === "kira") {
       app.innerHTML = kiraHtml();
     } else {
@@ -570,7 +658,7 @@
     "touchend",
     (e) => {
       const x = e.changedTouches[0].clientX;
-      if (touchX < 28 && x - touchX > 70 && route().name !== "home") {
+      if (touchX < 28 && x - touchX > 70 && route().name !== "home" && route().name !== "map") {
         history.back();
       }
     },
