@@ -3,6 +3,43 @@
   const roadmap = window.MF_ROADMAP || {};
   const cfg = window.MF_CONFIG || {};
   const app = document.getElementById("app");
+  const gatePassword = String(cfg.PASSWORD || "");
+  let gateOpen = false;
+  try {
+    gateOpen = localStorage.getItem("mf_gate") === "1";
+  } catch (_) {}
+  if (gatePassword && !gateOpen) {
+    document.body.className = "is-gate";
+    app.innerHTML = `
+      <main class="gate">
+        <p class="gate-brand">школа доктора шурова</p>
+        <h1>Скрипты</h1>
+        <p class="gate-lead">Введите пароль, чтобы открыть материалы.</p>
+        <form class="gate-form" id="gateForm">
+          <input id="gatePass" type="password" autocomplete="current-password" placeholder="Пароль" required />
+          <button type="submit">Войти</button>
+          <p class="gate-error" id="gateError" hidden>Неверный пароль</p>
+        </form>
+      </main>`;
+    const form = document.getElementById("gateForm");
+    const input = document.getElementById("gatePass");
+    const error = document.getElementById("gateError");
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (input.value.trim() !== gatePassword) {
+        error.hidden = false;
+        input.value = "";
+        input.focus();
+        return;
+      }
+      try {
+        localStorage.setItem("mf_gate", "1");
+      } catch (_) {}
+      location.reload();
+    });
+    input.focus();
+    return;
+  }
   let filter = "all";
   let query = "";
   let kiraChat = [

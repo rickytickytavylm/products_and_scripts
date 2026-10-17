@@ -1,5 +1,6 @@
 // Тот же сервер, что у веб-Киры: https://api.kira-ai.online
 window.MF_CONFIG = {
+  PASSWORD: "shurov26",
   BACKEND_URL:
     location.hostname === "localhost" || location.hostname === "127.0.0.1"
       ? "http://localhost:8788"

@@ -46,6 +46,41 @@ h1, h2, h3 {
 }
 
 .app { min-height: var(--app-h); }
+body.is-gate { overflow: hidden; }
+.gate {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 440px;
+  padding: 32px var(--gutter) 48px;
+}
+.gate-brand {
+  font-family: "Play", Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.gate h1 { font-size: 48px; margin: 18px 0 10px; }
+.gate-lead { color: var(--mute); margin-bottom: 22px; }
+.gate-form { display: flex; flex-direction: column; gap: 12px; }
+.gate-form input {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: var(--snow);
+}
+.gate-form button {
+  border: 0;
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.gate-error { color: #9b2c2c; font-size: 14px; margin: 0; }
 body.is-home .app,
 body.is-map .app { padding-bottom: calc(var(--dock-h) + env(safe-area-inset-bottom)); }
 body.is-kira .app {

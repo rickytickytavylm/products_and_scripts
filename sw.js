@@ -1,13 +1,13 @@
-const CACHE_NAME = "shurov-manager-v1";
+const CACHE_NAME = "shurov-manager-v2";
 const APP_SHELL = [
   "/",
   "/index.html",
   "/manifest.webmanifest",
-  "/styles.css?v=10",
-  "/config.js?v=5",
+  "/styles.css?v=11",
+  "/config.js?v=6",
   "/content.js?v=10",
   "/roadmap.js?v=2",
-  "/app.js?v=10",
+  "/app.js?v=11",
   "/pwa.js?v=1",
   "/assets/hero-desktop.webp",
   "/assets/hero-mobile.webp",
