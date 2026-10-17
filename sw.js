@@ -1,9 +1,9 @@
-const CACHE_NAME = "shurov-manager-v2";
+const CACHE_NAME = "shurov-manager-v3";
 const APP_SHELL = [
   "/",
   "/index.html",
   "/manifest.webmanifest",
-  "/styles.css?v=11",
+  "/styles.css?v=12",
   "/config.js?v=6",
   "/content.js?v=10",
   "/roadmap.js?v=2",

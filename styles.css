@@ -52,8 +52,9 @@ body.is-gate { overflow: hidden; }
   display: flex;
   flex-direction: column;
   justify-content: center;
-  max-width: 440px;
-  padding: 32px var(--gutter) 48px;
+  width: min(420px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 48px 0;
 }
 .gate-brand {
   font-family: "Play", Arial, sans-serif;
@@ -61,10 +62,16 @@ body.is-gate { overflow: hidden; }
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
-.gate h1 { font-size: 48px; margin: 18px 0 10px; }
-.gate-lead { color: var(--mute); margin-bottom: 22px; }
-.gate-form { display: flex; flex-direction: column; gap: 12px; }
+.gate h1 {
+  font-size: 48px;
+  margin: 18px 0 10px;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+.gate-lead { color: var(--mute); margin-bottom: 22px; max-width: 22em; }
+.gate-form { display: flex; flex-direction: column; gap: 12px; width: 100%; }
 .gate-form input {
   border: 1px solid var(--line);
   border-radius: 14px;
